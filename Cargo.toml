@@ -1,0 +1,16 @@
+[package]
+name = "am2320"
+description = ""
+version = "0.1.0"
+authors = ["Gabriel Féron <feron.gabriel@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+embedded-hal = "0.2"
+rppal = "*"
+
+[[example]]
+name = "tempread"
+
+[dev-dependencies]
+rppal = "*"
