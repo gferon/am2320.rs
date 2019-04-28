@@ -7,10 +7,10 @@ edition = "2018"
 
 [dependencies]
 embedded-hal = "0.2"
-rppal = "*"
-
-[[example]]
-name = "tempread"
 
 [dev-dependencies]
-rppal = "*"
+rppal = { version = "0.11", features = ["hal"] }
+
+# remove once PR is merged
+[patch.crates-io]
+rppal = { git = "https://github.com/gferon/rppal.git", branch = "remove-conflicting-impl" }
