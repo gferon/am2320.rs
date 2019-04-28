@@ -114,5 +114,5 @@ fn test_crc16() {
 #[test]
 fn test_combine_bytes() {
     assert_eq!(combine_bytes(0, 0), 0);
-    assert_eq!(combine_bytes(0xC5, 0x01), 0xDB);
+    assert_eq!(combine_bytes(0xC5, 0x01), 0xC501);
 }
