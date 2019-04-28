@@ -1,7 +1,9 @@
 [package]
 name = "am2320"
-description = ""
 version = "0.1.0"
+description = "Platform-agnostic driver to interface with the AM2320 I2c temperature & humidity sensor based on the `embedded-hal` traits"
+keywords = ["driver", "temperature", "humidity", "sensor", "embedded-hal"]
+license = "MIT OR Apache-2.0"
 authors = ["Gabriel Féron <feron.gabriel@gmail.com>"]
 edition = "2018"
 
