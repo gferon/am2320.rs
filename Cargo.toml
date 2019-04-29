@@ -1,7 +1,8 @@
 [package]
 name = "am2320"
-version = "0.1.0"
+version = "0.1.1"
 description = "Platform-agnostic driver to interface with the AM2320 I2c temperature & humidity sensor based on the `embedded-hal` traits"
+categories = ["hardware-support"]
 keywords = ["driver", "temperature", "humidity", "sensor", "embedded-hal"]
 license = "MIT OR Apache-2.0"
 authors = ["Gabriel Féron <feron.gabriel@gmail.com>"]
@@ -9,10 +10,3 @@ edition = "2018"
 
 [dependencies]
 embedded-hal = "0.2"
-
-[dev-dependencies]
-rppal = { version = "0.11", features = ["hal"] }
-
-# remove once PR is merged
-[patch.crates-io]
-rppal = { git = "https://github.com/gferon/rppal.git", branch = "remove-conflicting-impl" }

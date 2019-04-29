@@ -1,22 +1,40 @@
+//! # am2320
+//!
+//! A platform-agnostic driver to interface with the AM2320 I2c temperature & humidity
+//! sensor using `embedded-hal` traits.
+//!
+#![no_std]
+#![deny(warnings, missing_docs)]
+
 use embedded_hal::blocking::{delay, i2c};
 
 const DEVICE_I2C_ADDR: u8 = 0x5c;
 
+/// Describes potential errors
 #[derive(Debug)]
 pub enum Error {
-    ReadError,
+    /// Something went wrong while writing to the sensor
     WriteError,
+    /// Something went wrong while reading from the sensor
+    ReadError,
+    /// The sensor returned data that is out of spec
     SensorError,
 }
 
+/// Representation of one measurement from the sensor
 #[derive(Debug)]
 pub struct Measurement {
+    /// Temperature in celsius degrees (C)
     pub temperature: f64,
+    /// Humidity in percentage (%)
     pub humidity: f64,
 }
 
+/// Sensor configuration
 pub struct AM2320<I2C, Delay> {
+    /// I2C master device to use to communicate with the sensor
     device: I2C,
+    /// Delay device to be able to sleep in-between commands
     delay: Delay,
 }
 
@@ -45,16 +63,40 @@ where
     I2C: i2c::Read<Error = E> + i2c::Write<Error = E>,
     Delay: delay::DelayUs<u16>,
 {
+    /// Create a AM2320 temperature sensor driver.
+    ///
+    /// Example with `rppal`:
+    ///
+    /// ```!ignore
+    /// use am2320::*;
+    /// use rppal::{hal::Delay, i2c::I2c};
+    /// fn main() -> Result<(), Error> {
+    ///     let device = I2c::new().expect("could not initialize I2c on your RPi");
+    ///     let delay = Delay::new();
+    ///
+    ///     let mut am2320 = AM2320::new(device, delay);
+    ///
+    ///     println!("{:?}", am2320.read());
+    ///     Ok(())
+    /// }
+    /// ```
     pub fn new(device: I2C, delay: Delay) -> Self {
         Self { device, delay }
     }
 
+    /// Reads one `Measurement` from the sensor
+    ///
+    /// The operation is blocking, and should take ~3 ms according the spec.
+    /// This is because the sensor goes into sleep and has to be waken up first.
+    /// Then it'll wait a while before sending data in-order for the measurement
+    /// to be more accurate.
+    ///
     pub fn read(&mut self) -> Result<Measurement, Error> {
         // wake the AM2320 up, goes to sleep to not warm up and affect the humidity sensor
         // this write will fail as AM2320 won't ACK this write
         self.device
             .write(DEVICE_I2C_ADDR, &[0x00])
-            .map_err(|_| Error::ReadError)?;
+            .map_err(|_| Error::WriteError)?;
         // wait at least 0.8ms, at most 3ms
         self.delay.delay_us(1000);
 
@@ -62,7 +104,7 @@ where
         // wait at least 1.5ms for the result
         self.device
             .write(DEVICE_I2C_ADDR, &[0x03, 0x00, 0x04])
-            .map_err(|_| Error::ReadError)?;
+            .map_err(|_| Error::WriteError)?;
         self.delay.delay_us(1600);
 
         // read out 8 bytes of result data
@@ -74,7 +116,7 @@ where
         // byte 5: Temperature lsb
         // byte 6: CRC lsb byte
         // byte 7: CRC msb byte
-        let mut data: Vec<u8> = vec![0; 8];
+        let mut data = [0; 8];
         self.device
             .read(DEVICE_I2C_ADDR, &mut data)
             .map_err(|_| Error::ReadError)?;
