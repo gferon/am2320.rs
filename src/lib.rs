@@ -38,6 +38,7 @@ pub struct Am2320<I2C, Delay> {
     delay: Delay,
 }
 
+#[inline(always)]
 fn crc16(data: &[u8]) -> u16 {
     let mut crc: u16 = 0xFFFF;
     for e in data.iter() {
@@ -54,6 +55,7 @@ fn crc16(data: &[u8]) -> u16 {
     crc
 }
 
+#[inline(always)]
 fn combine_bytes(msb: u8, lsb: u8) -> u16 {
     ((msb as u16) << 8) | lsb as u16
 }
