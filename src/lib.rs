@@ -21,17 +21,17 @@ pub enum Error {
     SensorError,
 }
 
-/// Representation of one measurement from the sensor
+/// Representation of a measurement from the sensor
 #[derive(Debug)]
 pub struct Measurement {
-    /// Temperature in celsius degrees (C)
+    /// Temperature in degrees celsius (°C)
     pub temperature: f64,
-    /// Humidity in percentage (%)
+    /// Humidity in percent (%)
     pub humidity: f64,
 }
 
 /// Sensor configuration
-pub struct AM2320<I2C, Delay> {
+pub struct Am2320<I2C, Delay> {
     /// I2C master device to use to communicate with the sensor
     device: I2C,
     /// Delay device to be able to sleep in-between commands
@@ -58,7 +58,7 @@ fn combine_bytes(msb: u8, lsb: u8) -> u16 {
     ((msb as u16) << 8) | lsb as u16
 }
 
-impl<I2C, Delay, E> AM2320<I2C, Delay>
+impl<I2C, Delay, E> Am2320<I2C, Delay>
 where
     I2C: i2c::Read<Error = E> + i2c::Write<Error = E>,
     Delay: delay::DelayUs<u16>,
@@ -74,7 +74,7 @@ where
     ///     let device = I2c::new().expect("could not initialize I2c on your RPi");
     ///     let delay = Delay::new();
     ///
-    ///     let mut am2320 = AM2320::new(device, delay);
+    ///     let mut am2320 = Am2320::new(device, delay);
     ///
     ///     println!("{:?}", am2320.read());
     ///     Ok(())
@@ -92,19 +92,18 @@ where
     /// to be more accurate.
     ///
     pub fn read(&mut self) -> Result<Measurement, Error> {
-        // wake the AM2320 up, goes to sleep to not warm up and affect the humidity sensor
-        // this write will fail as AM2320 won't ACK this write
-        self.device
-            .write(DEVICE_I2C_ADDR, &[0x00])
-            .map_err(|_| Error::WriteError)?;
-        // wait at least 0.8ms, at most 3ms
-        self.delay.delay_us(1000);
+        // We need to wake up the AM2320, since it goes to sleep in order not
+        // to warm up and affect the humidity sensor. This write will fail as
+        // the AM2320 won't ACK this write.
+        let _ = self.device.write(DEVICE_I2C_ADDR, &[0x00]);
+        // Wait at least 0.8ms, at most 3ms.
+        self.delay.delay_us(900);
 
-        // send command
-        // wait at least 1.5ms for the result
+        // Send read command.
         self.device
             .write(DEVICE_I2C_ADDR, &[0x03, 0x00, 0x04])
             .map_err(|_| Error::WriteError)?;
+        // Wait at least 1.5ms for the result.
         self.delay.delay_us(1600);
 
         // read out 8 bytes of result data
