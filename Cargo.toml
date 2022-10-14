@@ -11,3 +11,6 @@ repository = "https://github.com/gferon/am2320.rs"
 
 [dependencies]
 embedded-hal = "0.2"
+
+[dev-dependencies]
+rppal = { version = "0.13", features = ["hal"] }
