@@ -6,6 +6,12 @@ A platform-agnostic driver to interface with the AM2320 I2c temperature & humidi
 
 You can find an example to use the sensor with a RaspberryPI under `examples/`.
 
+Build for Raspberry Pi Zero using [cross](https://github.com/cross-rs/cross) with
+
+```
+$ cross build --target=arm-unknown-linux-musleabihf --example=print
+```
+
 ## License
 
 Licensed under either of
